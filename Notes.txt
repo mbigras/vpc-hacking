@@ -1,0 +1,60 @@
+VPC Hacking
+
+todo
+
+manage ec2 instances with terraform
+build automated usage example
+
+Overview
+
+Security groups
+
+Links
+
+https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html
+
+Security groups
+
+https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html
+
+Security groups act at the instance level, not the subnet level.
+
+https://stackoverflow.com/a/30544572/2909897
+
+Add a new EC2 security group inbound rule:
+
+Type: Custom ICMP rule
+Protocol: Echo Request
+Port: N/A
+Source: your choice (I would select Anywhere to be able to ping from any machine)
+
+tcpdump -i eth0 icmp | awk '/echo request/ { print "echo request from", $3 }'
+
+pretend like 167.99.165.244 is a bad ip
+
+Can I block it with a security group?
+What about a Network Access Control List
+
+now any instance in this subnet will start following NACL rules
+
+https://www.quora.com/What-is-the-difference-between-security-groups-and-the-network-access-control-list-in-AWS
+
+Security groups evaluate all the rules in them before allowing a traffic . NACLs do it in the number order, from top to bottom like, if your rule #0 says allow all HTTP traffic and your rule #100 says don't allow HTTP traffic from ip address 10.0.2.156 , it's will not be able to deny the traffic, because rule #0 has already allowed traffic. So it's good practice to have your deny rules first in NACL and followed by allow rules. AWS best practice is to number your rules in increment of 100s in NACL. By deny rules first I mean, specifying narrow deny rules, like for specific ports only. And then write your allow rules.
+
+tcpdump -i eth0 icmp | awk '/echo request/ { print "echo request from", $3 }'
+echo request from 167.99.165.244
+echo request from c-24-6-3-183.hsd1.ca.comcast.net
+echo request from 167.99.165.244
+echo request from c-24-6-3-183.hsd1.ca.comcast.net
+echo request from 167.99.165.244
+echo request from c-24-6-3-183.hsd1.ca.comcast.net
+echo request from 167.99.165.244
+echo request from c-24-6-3-183.hsd1.ca.comcast.net
+echo request from 167.99.165.244
+echo request from c-24-6-3-183.hsd1.ca.comcast.net
+echo request from c-24-6-3-183.hsd1.ca.comcast.net
+echo request from c-24-6-3-183.hsd1.ca.comcast.net
+
+Success!!
+
+Key insight: the ordering matters for Network Access Control Lists, denies need to be before allows
